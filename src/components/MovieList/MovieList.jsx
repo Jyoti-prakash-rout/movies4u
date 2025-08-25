@@ -73,7 +73,7 @@ const MovieList = () => {
               id=""
               className="movie_sorting">
               <option value="default">SortBy</option>
-              <option value="relese_date">Date</option>
+              <option value="release_date">Date</option>
               <option value="vote_average">Rating</option>
             </select>
             <select

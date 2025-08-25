@@ -1,10 +1,19 @@
 import React, { useEffect, useState } from "react";
+import _ from "lodash";
+
 import "./MovieList.css";
 import fire from "../../assets/fire.png";
 import MovieCard from "./MovieCard";
+import FilterGroup from "./FilterGroup";
 
 const MovieList = () => {
   const [movies, setMovies] = useState([]);
+  const [filterMovies, setFilterMovies] = useState([]);
+  const [minRating, setMinRating] = useState(0);
+  const [sort, setSort] = useState({
+    by: "default",
+    order: "asc",
+  });
 
   const fetchMovies = async () => {
     const response = await fetch(
@@ -12,11 +21,37 @@ const MovieList = () => {
     );
     const data = await response.json();
     setMovies(data.results);
+    setFilterMovies(data.results);
   };
 
   useEffect(() => {
     fetchMovies();
   }, []);
+
+  useEffect(() => {
+    if (sort.by !== "default") {
+      const sortedMovies = _.orderBy(filterMovies, [sort.by], [sort.order]);
+      setFilterMovies(sortedMovies);
+    }
+  }, [sort]);
+
+  const handleFilter = (rate) => {
+    if (rate === minRating) {
+      setMinRating(0);
+      setFilterMovies(movies);
+    } else {
+      setMinRating(rate);
+      const filtered = movies.filter((movie) => movie.vote_average >= rate);
+      setFilterMovies(filtered);
+    }
+  };
+
+  const handleSort = (e) => {
+    const { name, value } = e.target;
+    setSort((prev) => {
+      return { ...prev, [name]: value };
+    });
+  };
 
   return (
     <>
@@ -26,24 +61,34 @@ const MovieList = () => {
             Popular <img src={fire} alt="Fire Emoji" className="navbar_emoji" />
           </h2>
           <div className=" align_center movie_list_fs">
-            <ul className=" align_center movie_filter">
-              <li className="movie_filter_item active">8+ Star</li>
-              <li className="movie_filter_item">7+ Star</li>
-              <li className="movie_filter_item">6+ Star</li>
-            </ul>
-            <select name="" id="" className="movie_sorting">
-              <option value="">SortBy</option>
-              <option value="">Date</option>
-              <option value="">Rating</option>
+            <FilterGroup
+              minRating={minRating}
+              onRatingClick={handleFilter}
+              ratings={[8, 7, 6]}
+            />
+            <select
+              onChange={handleSort}
+              value={sort.by}
+              name="by"
+              id=""
+              className="movie_sorting">
+              <option value="default">SortBy</option>
+              <option value="relese_date">Date</option>
+              <option value="vote_average">Rating</option>
             </select>
-            <select name="" id="" className="movie_sorting">
-              <option value="">Ascending</option>
-              <option value="">Descending</option>
+            <select
+              onChange={handleSort}
+              value={sort.order}
+              name="order"
+              id=""
+              className="movie_sorting">
+              <option value="asc">Ascending</option>
+              <option value="desc">Descending</option>
             </select>
           </div>
         </header>
         <div className="movie_cards">
-          {movies.map((movie) => (
+          {filterMovies.map((movie) => (
             <MovieCard key={movie.id} movie={movie} />
           ))}
         </div>

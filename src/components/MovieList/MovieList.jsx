@@ -6,8 +6,8 @@ import fire from "../../assets/fire.png";
 import MovieCard from "./MovieCard";
 import FilterGroup from "./FilterGroup";
 
-const MovieList = () => {
-  const [movies, setMovies] = useState([]);
+const MovieList = ({ movies, setMovies }) => {
+  // const [movies, setMovies] = useState([]);
   const [filterMovies, setFilterMovies] = useState([]);
   const [minRating, setMinRating] = useState(0);
   const [sort, setSort] = useState({
@@ -27,6 +27,10 @@ const MovieList = () => {
   useEffect(() => {
     fetchMovies();
   }, []);
+
+  useEffect(() => {
+    setFilterMovies(movies)
+  }, [movies]);
 
   useEffect(() => {
     if (sort.by !== "default") {
